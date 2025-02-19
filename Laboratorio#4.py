@@ -4,6 +4,7 @@ from collections import deque, defaultdict
 import matplotlib.patches as patches
 import numpy as np
 import math
+import csv 
 
 class Node:
     def __init__(self, data, left=None, right=None):
@@ -456,7 +457,57 @@ class RegexToDFA:
         self.parse_regex()
         self.construct_dfa()
         self.minimize_dfa()
+    
+    #Parte para imprimir en el csv la descripcion de mi afd DEEPTSEK
+    def export_dfa(self, filename="dfa_description.csv", minimized=True):
+        if minimized and self.minimized_dfa:
+            dfa = self.minimized_dfa
+        elif self.dfa:
+            dfa = self.dfa
+        else:
+            raise ValueError("Primero debe construir el DFA")
         
+        # Obtener la información del AFD
+        states = list(range(dfa['states']))
+        initial_state = dfa['initial']
+        final_states = list(dfa['final_states'])
+        transitions = dfa['transitions']
+        
+        # Crear una lista para almacenar las transiciones
+        transitions_list = []
+        for (src, symbol), dest in transitions.items():
+            transitions_list.append({
+                'source': src,
+                'symbol': symbol,
+                'destination': dest
+            })
+        
+        # Si se proporciona un nombre de archivo, exportar a CSV
+        if filename:
+            with open(filename, mode='w', newline='', encoding='utf-8') as file:
+                # Escribir los estados
+                file.write("Estados:\n")
+                file.write(",".join(map(str, states)))  # Convertir estados a cadena
+                file.write("\n\n")
+                
+                # Escribir el estado inicial
+                file.write("Estado Inicial:\n")
+                file.write(str(initial_state))
+                file.write("\n\n")
+                
+                # Escribir los estados finales
+                file.write("Estados Finales:\n")
+                file.write(",".join(map(str, final_states)))  # Convertir estados finales a cadena
+                file.write("\n\n")
+                
+                # Escribir las transiciones
+                file.write("Transiciones:\n")
+                writer = csv.DictWriter(file, fieldnames=['source', 'symbol', 'destination'])
+                writer.writeheader()  # Escribir la cabecera
+                writer.writerows(transitions_list)  # Escribir todas las transiciones
+                    
+            print(f"Descripción del AFD guardada en '{filename}'")
+            
 def main():
     while True:
         print("\n==== Analizador de Expresiones Regulares ====")
@@ -475,6 +526,9 @@ def main():
             
             # Visualizar el AFD minimizado
             converter.visualize_automaton(minimized=True, filename="minimized_dfa")
+            
+            # Exportar la descripción del AFD a un archivo CSV
+            converter.export_dfa(filename="dfa_description.csv", minimized=True)
             
             # Procesar cadenas
             while True:

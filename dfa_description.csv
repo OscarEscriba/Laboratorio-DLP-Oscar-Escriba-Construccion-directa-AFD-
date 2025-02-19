@@ -1,0 +1,15 @@
+Estados:
+0,1,2
+
+Estado Inicial:
+0
+
+Estados Finales:
+2
+
+Transiciones:
+source,symbol,destination
+0,a,1
+1,c,2
+1,b,2
+2,d,2
